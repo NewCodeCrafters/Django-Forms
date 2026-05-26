@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}Create Account — Nexus{% endblock %}
+
+{% block extra_head %}
+<style>
+  .auth-wrapper {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 1rem 4rem;
+  }
+
+  .auth-box {
+    width: 100%;
+    max-width: 460px;
+  }
+
+  .auth-eyebrow {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent2);
+    margin-bottom: 0.5rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .auth-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 18px; height: 1px;
+    background: var(--accent2);
+  }
+
+  .auth-title {
+    font-family: var(--font-head);
+    font-size: 2.4rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    margin-bottom: 0.4rem;
+  }
+  .auth-title em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .auth-sub {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+
+  /* Step indicator */
+  .step-bar {
+    display: flex; gap: 6px; margin-bottom: 1.5rem;
+  }
+  .step-bar span {
+    flex: 1; height: 3px; border-radius: 2px;
+    background: var(--border);
+    transition: background 0.4s ease;
+  }
+  .step-bar span.active { background: var(--accent); }
+  .step-bar span.done   { background: var(--accent2); }
+
+  /* Two-column row */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+  }
+
+  /* File upload */
+  .field input[type="file"] {
+    padding: 0.6rem;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .field input[type="file"]::file-selector-button {
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    color: var(--accent);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    margin-right: 0.6rem;
+    transition: background 0.2s;
+  }
+  .field input[type="file"]::file-selector-button:hover {
+    background: rgba(0,229,255,0.15);
+  }
+
+  .password-wrap { position: relative; }
+  .password-wrap input { padding-right: 2.8rem; }
+  .toggle-pw {
+    position: absolute; right: 0.9rem; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    color: var(--muted); cursor: pointer;
+    font-size: 0.85rem; padding: 0;
+    transition: color 0.2s;
+  }
+  .toggle-pw:hover { color: var(--text); }
+
+  /* Password strength meter */
+  .strength-bar {
+    display: flex; gap: 4px; margin-top: 0.4rem;
+  }
+  .strength-bar div {
+    flex: 1; height: 3px; border-radius: 2px;
+    background: var(--border); transition: background 0.3s;
+  }
+  .s1 { background: var(--danger) !important; }
+  .s2 { background: #f59e0b !important; }
+  .s3 { background: var(--success) !important; }
+
+  .blob2 {
+    position: fixed; top: 40%; right: -120px;
+    width: 350px; height: 350px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(123,94,167,0.1) 0%, transparent 70%);
+    pointer-events: none;
+    animation: orbFloat 18s ease-in-out infinite;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="blob2"></div>
+
+  <div class="auth-box">
+    <div class="animate-up"><p class="auth-eyebrow">New here</p></div>
+    <div class="animate-up">
+      <h1 class="auth-title">Create your<br><em>account</em></h1>
+    </div>
+    <div class="animate-up"><p class="auth-sub">Fill in the details below to get started</p></div>
+
+    <div class="animate-up">
+      <div class="card">
+        <form method="post" enctype="multipart/form-data" id="signupForm">
+          {% csrf_token %}
+
+          <div class="field-row">
+            <div class="field">
+              <label>First name</label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}
+                {% for err in form.first_name.errors %}<span class="error-text">{{ err }}</span>{% endfor %}
+              {% endif %}
+            </div>
+            <div class="field">
+              <label>Last name</label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}
+                {% for err in form.last_name.errors %}<span class="error-text">{{ err }}</span>{% endfor %}
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+              {% for err in form.username.errors %}<span class="error-text">{{ err }}</span>{% endfor %}
+            {% endif %}
+          </div>
+
+          <div class="field">
+            <label>Email address</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+              {% for err in form.email.errors %}<span class="error-text">{{ err }}</span>{% endfor %}
+            {% endif %}
+          </div>
+
+          <div class="field">
+            <label>Password</label>
+            <div class="password-wrap">
+              {{ form.password }}
+              <button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password">👁</button>
+            </div>
+            <div class="strength-bar" id="strengthBar">
+              <div id="s1"></div><div id="s2"></div><div id="s3"></div>
+            </div>
+            {% if form.password.errors %}
+              {% for err in form.password.errors %}<span class="error-text">{{ err }}</span>{% endfor %}
+            {% endif %}
+          </div>
+
+          {% if form.profile_picture %}
+          <div class="field">
+            <label>Profile picture <span class="text-muted">(optional)</span></label>
+            {{ form.profile_picture }}
+          </div>
+          {% endif %}
+
+          {% if form.user_type %}
+          <div class="field">
+            <label>Account type</label>
+            {{ form.user_type }}
+          </div>
+          {% endif %}
+
+          {% for field in form %}
+            {% if field.name not in "first_name,last_name,username,email,password,profile_picture,user_type" %}
+              <div class="field">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                  {% for err in field.errors %}<span class="error-text">{{ err }}</span>{% endfor %}
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+
+          <div style="height:0.4rem;"></div>
+          <button type="submit" class="btn btn-primary">Create account →</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="animate-up">
+      <p class="text-center text-muted" style="margin-top:1.5rem;">
+        Already have an account? <a href="{% url 'login' %}">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Toggle password visibility
+  const pwField = document.querySelector('#signupForm input[type="password"]');
+  document.getElementById('togglePw')?.addEventListener('click', () => {
+    pwField.type = pwField.type === 'password' ? 'text' : 'password';
+  });
+
+  // Password strength meter
+  pwField?.addEventListener('input', () => {
+    const v = pwField.value;
+    const s1 = document.getElementById('s1');
+    const s2 = document.getElementById('s2');
+    const s3 = document.getElementById('s3');
+    [s1,s2,s3].forEach(el => el.className = '');
+
+    const score = [v.length >= 8, /[A-Z]/.test(v) && /[0-9]/.test(v), /[^A-Za-z0-9]/.test(v)]
+      .filter(Boolean).length;
+
+    if (score >= 1) s1.classList.add('s1');
+    if (score >= 2) s2.classList.add('s2');
+    if (score >= 3) s3.classList.add('s3');
+  });
+</script>
+{% endblock %}
