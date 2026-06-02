@@ -1,6 +1,7 @@
 from django import forms
 from .models import User
 
+
 class SignupForm(forms.ModelForm):
 
     class Meta:
@@ -8,27 +9,26 @@ class SignupForm(forms.ModelForm):
 
         fields = [
             "username",
-            'email',
-            'password',
+            "email",
+            "password",
             "user_type",
             "profile_pic"
         ]
 
-        def clean(self):
-            email = self.cleaned_data.get("email")
+    def clean_email(self):
 
-            if User.objects.filter(email=email).exists():
-                raise forms.ValidationError(
-                    "Email or User already exists"
-                )
-            
+        email = self.cleaned_data.get("email")
 
-class Loginform(forms.ModelForm):
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError(
+                "Email already exists"
+            )
 
-    class Meta:
-        model = User
+        return email
 
-        fields = [
-            "email",
-            "password"
-        ]
+
+class LoginForm(forms.Form):
+
+    email = forms.EmailField()
+
+    password = forms.CharField()
