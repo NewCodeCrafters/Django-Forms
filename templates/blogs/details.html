@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+{% block title %}{{ blog.title }} — Nexus{% endblock %}
+
+{% block extra_head %}
+<style>
+  .detail-wrapper {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem 6rem;
+  }
+
+  /* ── Back link ── */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+    margin-bottom: 2.5rem;
+    transition: color 0.2s;
+    animation: riseUp 0.3s ease both;
+  }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .back-link::before { content: '←'; }
+
+  /* ── Hero image ── */
+  .detail-hero-img {
+    width: 100%;
+    height: 380px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+    background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(123,94,167,0.12));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-head);
+    font-size: 6rem;
+    font-weight: 800;
+    color: rgba(0,229,255,0.1);
+    letter-spacing: -0.05em;
+    position: relative;
+    animation: riseUp 0.4s 0.04s ease both;
+    border: 1px solid var(--border);
+  }
+  .detail-hero-img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    position: absolute; inset: 0;
+  }
+
+  /* ── Meta bar ── */
+  .detail-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+    animation: riseUp 0.4s 0.08s ease both;
+  }
+
+  .author-chip {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.35rem 0.9rem 0.35rem 0.35rem;
+    background: rgba(0,229,255,0.06);
+    border: 1px solid rgba(0,229,255,0.14);
+    border-radius: 99px;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .author-avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700; color: #080a0f;
+  }
+
+  .detail-date {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .status-badge {
+    margin-left: auto;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.7rem;
+    border-radius: 99px;
+    background: rgba(0,229,176,0.1);
+    border: 1px solid rgba(0,229,176,0.25);
+    color: var(--success);
+  }
+
+  /* ── Title ── */
+  .detail-title {
+    font-family: var(--font-head);
+    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    margin-bottom: 2rem;
+    animation: riseUp 0.4s 0.12s ease both;
+  }
+
+  /* ── Article body ── */
+  .detail-body {
+    font-size: 0.95rem;
+    line-height: 1.85;
+    color: rgba(232, 234, 240, 0.85);
+    animation: riseUp 0.5s 0.18s ease both;
+  }
+  .detail-body p { margin-bottom: 1.2rem; }
+  .detail-body h2, .detail-body h3 {
+    font-family: var(--font-head);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 2rem 0 0.8rem;
+    color: var(--text);
+  }
+  .detail-body h2 { font-size: 1.5rem; }
+  .detail-body h3 { font-size: 1.2rem; }
+  .detail-body a { color: var(--accent); }
+  .detail-body blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 0.75rem 1.2rem;
+    margin: 1.5rem 0;
+    background: rgba(0,229,255,0.04);
+    border-radius: 0 10px 10px 0;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .detail-body code {
+    background: rgba(255,255,255,0.06);
+    padding: 0.15em 0.45em;
+    border-radius: 5px;
+    font-size: 0.88em;
+    color: var(--accent);
+  }
+  .detail-body pre {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  .detail-body pre code { background: none; padding: 0; }
+
+  /* ── Divider ── */
+  .detail-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 3rem 0;
+    animation: riseUp 0.5s 0.2s ease both;
+  }
+
+  /* ── Author actions ── */
+  .author-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+    animation: riseUp 0.5s 0.22s ease both;
+  }
+  .author-actions p {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-right: 0.5rem;
+  }
+
+  .btn-edit {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.6rem 1.2rem;
+    border-radius: 9px;
+    border: 1px solid rgba(0,229,255,0.25);
+    background: rgba(0,229,255,0.07);
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-edit:hover {
+    background: rgba(0,229,255,0.14);
+    text-decoration: none;
+    color: var(--accent);
+  }
+
+  .btn-delete {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.6rem 1.2rem;
+    border-radius: 9px;
+    border: 1px solid rgba(255,77,109,0.25);
+    background: rgba(255,77,109,0.06);
+    color: var(--danger);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-delete:hover {
+    background: rgba(255,77,109,0.14);
+    text-decoration: none;
+    color: var(--danger);
+  }
+
+  /* ── Scroll progress bar ── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 200;
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 0.1s linear;
+  }
+
+  .detail-updated {
+    font-size: 0.72rem;
+    color: var(--accent2);
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .detail-updated::before { content: '↻'; }
+
+  .detail-description {
+    font-size: 1.05rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    font-style: italic;
+    animation: riseUp 0.4s 0.14s ease both;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="detail-wrapper">
+
+  <a href="{% url 'b_list' %}" class="back-link">Back to all posts</a>
+
+  {% if blog.image %}
+  <div class="detail-hero-img">
+    <img src="{{ blog.image.url }}" alt="{{ blog.title }}" />
+  </div>
+  {% elif blog.thumbnail %}
+  <div class="detail-hero-img">
+    <img src="{{ blog.thumbnail.url }}" alt="{{ blog.title }}" />
+  </div>
+  {% else %}
+  <div class="detail-hero-img">{{ blog.title|first|upper }}</div>
+  {% endif %}
+
+  <div class="detail-meta">
+    <span class="author-chip">
+      <span class="author-avatar">{{ blog.author.username|first|upper }}</span>
+      {{ blog.author.username }}
+    </span>
+    <span class="detail-date">
+      Published {{ blog.created_at|date:"F j, Y" }}
+    </span>
+    {% if blog.updated_at and blog.updated_at != blog.created_at %}
+      <span class="detail-updated">Updated {{ blog.updated_at|date:"F j, Y" }}</span>
+    {% endif %}
+    <span class="status-badge">{{ blog.status }}</span>
+  </div>
+
+  <h1 class="detail-title">{{ blog.title }}</h1>
+
+  {% if blog.description %}
+  <p class="detail-description">{{ blog.description }}</p>
+  {% endif %}
+
+  <div class="detail-body">
+    {{ blog.content|safe }}
+  </div>
+
+  {% if request.session.user_id == blog.author.id %}
+    <div class="detail-divider"></div>
+    <div class="author-actions">
+      <p>You authored this post:</p>
+      <a href="{% url 'update' slug=blog.slug %}" class="btn-edit">✎ Edit</a>
+      <a href="{% url 'delete' slug=blog.slug %}" class="btn-delete">✕ Delete</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const bar = document.getElementById('progressBar');
+  window.addEventListener('scroll', () => {
+    const total = document.body.scrollHeight - window.innerHeight;
+    const pct = total > 0 ? window.scrollY / total : 0;
+    bar.style.transform = `scaleX(${pct})`;
+  });
+</script>
+{% endblock %}

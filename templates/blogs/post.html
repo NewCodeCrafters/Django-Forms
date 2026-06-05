@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}New Post — Nexus{% endblock %}
+
+{% block extra_head %}
+<style>
+  .editor-wrapper {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem 6rem;
+  }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: 0.78rem; color: var(--muted); text-decoration: none;
+    margin-bottom: 2rem; transition: color 0.2s;
+    animation: riseUp 0.3s ease both;
+  }
+  .back-link::before { content: '←'; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+
+  .editor-header { margin-bottom: 2.5rem; animation: riseUp 0.4s 0.06s ease both; }
+  .editor-eyebrow {
+    font-size: 0.7rem; text-transform: uppercase;
+    letter-spacing: 0.15em; color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+  .editor-title {
+    font-family: var(--font-head);
+    font-size: 2.4rem; font-weight: 800;
+    letter-spacing: -0.04em; line-height: 1.1;
+  }
+
+  .editor-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.2rem;
+    position: relative;
+    overflow: hidden;
+    animation: riseUp 0.5s 0.1s ease both;
+  }
+  .editor-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.4;
+  }
+
+  /* Bigger title input */
+  .field-title input {
+    font-family: var(--font-head) !important;
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em;
+    height: auto;
+    padding: 0.9rem 1rem !important;
+  }
+
+  /* Bigger textarea for content */
+  .field textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    line-height: 1.7;
+    outline: none;
+    resize: vertical;
+    min-height: 280px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .field textarea:focus {
+    border-color: rgba(0,229,255,0.4);
+    box-shadow: 0 0 0 3px rgba(0,229,255,0.07);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .char-counter {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: right;
+    margin-top: 0.3rem;
+  }
+  .char-counter.warn { color: #f59e0b; }
+
+  .field input[type="file"] {
+    padding: 0.6rem;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .field input[type="file"]::file-selector-button {
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    color: var(--accent);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    margin-right: 0.6rem;
+    transition: background 0.2s;
+  }
+  .field input[type="file"]::file-selector-button:hover {
+    background: rgba(0,229,255,0.15);
+  }
+
+  /* Image preview */
+  .img-preview-wrap { position: relative; margin-top: 0.6rem; }
+  .img-preview {
+    width: 100%; max-height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    display: none;
+  }
+
+  .form-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.8rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-cancel {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    padding: 0.75rem 1.4rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-cancel:hover { color: var(--text); border-color: rgba(255,255,255,0.15); text-decoration: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="editor-wrapper">
+
+  <a href="{% url 'b_list' %}" class="back-link">Back to posts</a>
+
+  <div class="editor-header">
+    <p class="editor-eyebrow">Compose</p>
+    <h1 class="editor-title">New post</h1>
+  </div>
+
+  <div class="editor-card">
+    <form method="post" enctype="multipart/form-data" id="postForm">
+      {% csrf_token %}
+
+      <div class="field field-title" style="margin-bottom:1.2rem;">
+        <label>Post title</label>
+        {{ form.title }}
+        {% if form.title.errors %}
+          {% for err in form.title.errors %}<span class="error-text">{{ err }}</span>{% endfor %}
+        {% endif %}
+      </div>
+
+      <div class="field" style="margin-bottom:1.2rem;">
+        <label>Content</label>
+        {{ form.content }}
+        <div class="char-counter" id="charCount">0 characters</div>
+        {% if form.content.errors %}
+          {% for err in form.content.errors %}<span class="error-text">{{ err }}</span>{% endfor %}
+        {% endif %}
+      </div>
+
+      <div class="form-row">
+        {% if form.status %}
+        <div class="field">
+          <label>Status</label>
+          {{ form.status }}
+          {% if form.status.errors %}
+            {% for err in form.status.errors %}<span class="error-text">{{ err }}</span>{% endfor %}
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {% if form.thumbnail %}
+        <div class="field">
+          <label>Thumbnail <span class="text-muted">(optional)</span></label>
+          {{ form.thumbnail }}
+          <div class="img-preview-wrap">
+            <img class="img-preview" id="imgPreview" alt="Preview" />
+          </div>
+          {% if form.thumbnail.errors %}
+            {% for err in form.thumbnail.errors %}<span class="error-text">{{ err }}</span>{% endfor %}
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      {% for field in form %}
+        {% if field.name not in "title,content,status,thumbnail" %}
+        <div class="field">
+          <label>{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            {% for err in field.errors %}<span class="error-text">{{ err }}</span>{% endfor %}
+          {% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+
+      <div class="form-footer">
+        <a href="{% url 'b_list' %}" class="btn-cancel">Cancel</a>
+        <button type="submit" class="btn btn-primary" style="width:auto; padding:0.75rem 2rem;">
+          Publish post →
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Char counter
+  const content = document.querySelector('#postForm textarea');
+  const counter = document.getElementById('charCount');
+  if (content) {
+    content.addEventListener('input', () => {
+      const n = content.value.length;
+      counter.textContent = n.toLocaleString() + ' characters';
+      counter.className = 'char-counter' + (n > 5000 ? ' warn' : '');
+    });
+  }
+
+  // Image preview
+  const fileInput = document.querySelector('input[type="file"]');
+  const preview = document.getElementById('imgPreview');
+  if (fileInput && preview) {
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+      }
+    });
+  }
+</script>
+{% endblock %}

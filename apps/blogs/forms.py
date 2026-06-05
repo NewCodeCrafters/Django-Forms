@@ -7,10 +7,10 @@ class BlogForm(forms.ModelForm):
         model = Blogs
 
         fields = [
-            "Title",
-            "description"
+            "title",
+            "description",
             "image",
-            "status"
+            "status",
         ]
 
         def clean_title(self):

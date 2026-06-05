@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+{% block title %}Blogs — Nexus{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem 6rem;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+  }
+
+  .page-header-left .eyebrow {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+    animation: riseUp 0.35s ease both;
+  }
+
+  .page-header-left h1 {
+    font-family: var(--font-head);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    animation: riseUp 0.4s 0.06s ease both;
+  }
+  .page-header-left h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .page-header-left .count {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    animation: riseUp 0.4s 0.1s ease both;
+  }
+
+  .btn-new {
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.75rem 1.5rem;
+    background: var(--accent);
+    color: #080a0f;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 20px rgba(0,229,255,0.2);
+    animation: riseUp 0.4s 0.12s ease both;
+    white-space: nowrap;
+  }
+  .btn-new:hover {
+    background: #00c4e0;
+    box-shadow: 0 6px 30px rgba(0,229,255,0.4);
+    transform: translateY(-2px);
+    text-decoration: none;
+    color: #080a0f;
+  }
+
+  /* ── Blog grid ── */
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.4rem;
+  }
+
+  .blog-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+    animation: riseUp 0.5s ease both;
+    position: relative;
+  }
+  .blog-card:hover {
+    border-color: rgba(0,229,255,0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,229,255,0.08);
+  }
+
+  .blog-card-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(123,94,167,0.1));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-head);
+    font-size: 3rem;
+    font-weight: 800;
+    color: rgba(0,229,255,0.15);
+    letter-spacing: -0.05em;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .blog-card-img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    position: absolute; inset: 0;
+  }
+  .blog-card-img::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: linear-gradient(transparent, var(--surface));
+  }
+
+  .blog-card-body {
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0.6rem;
+  }
+
+  .blog-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .blog-author-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .author-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #080a0f;
+    flex-shrink: 0;
+  }
+  .blog-date {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .blog-title {
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .blog-title:hover { color: var(--accent); text-decoration: none; }
+
+  .blog-excerpt {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .blog-card-footer {
+    padding: 0 1.4rem 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .read-link {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: gap 0.2s;
+  }
+  .read-link:hover { gap: 0.6rem; text-decoration: none; }
+
+  .card-actions {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .action-btn {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); text-decoration: none; }
+  .action-btn.danger:hover { color: var(--danger); border-color: rgba(255,77,109,0.3); background: rgba(255,77,109,0.05); }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center;
+    padding: 6rem 2rem;
+    grid-column: 1 / -1;
+    animation: riseUp 0.5s ease both;
+  }
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+  .empty-state h3 {
+    font-family: var(--font-head);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--muted);
+  }
+  .empty-state p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  /* stagger cards */
+  .blog-card:nth-child(1) { animation-delay: 0.05s; }
+  .blog-card:nth-child(2) { animation-delay: 0.10s; }
+  .blog-card:nth-child(3) { animation-delay: 0.15s; }
+  .blog-card:nth-child(4) { animation-delay: 0.20s; }
+  .blog-card:nth-child(5) { animation-delay: 0.25s; }
+  .blog-card:nth-child(6) { animation-delay: 0.30s; }
+
+  .blog-updated {
+    font-size: 0.68rem;
+    color: var(--accent2);
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .blog-updated::before {
+    content: '↻';
+    font-size: 0.75rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <div class="page-header-left">
+      <p class="eyebrow">All posts</p>
+      <h1>The <em>Blog</em></h1>
+      <p class="count">{{ blogs|length }} published article{{ blogs|length|pluralize }}</p>
+    </div>
+    <a href="{% url 'post_blog' %}" class="btn-new">
+      + New post
+    </a>
+  </div>
+
+  <div class="blog-grid">
+    {% if blogs %}
+      {% for blog in blogs %}
+        <article class="blog-card">
+          <div class="blog-card-img">
+            {% if blog.image %}
+              <img src="{{ blog.image.url }}" alt="{{ blog.title }}" />
+            {% elif blog.thumbnail %}
+              <img src="{{ blog.thumbnail.url }}" alt="{{ blog.title }}" />
+            {% else %}
+              {{ blog.title|first|upper }}
+            {% endif %}
+          </div>
+
+          <div class="blog-card-body">
+            <div class="blog-meta">
+              <span class="blog-author-chip">
+                <span class="author-dot">{{ blog.author.username|first|upper }}</span>
+                {{ blog.author.username }}
+              </span>
+              <span class="blog-date">{{ blog.created_at|date:"M d, Y" }}</span>
+            </div>
+
+            <a href="{% url 'details' slug=blog.slug %}" class="blog-title">
+              {{ blog.title }}
+            </a>
+
+            {% if blog.description %}
+              <p class="blog-excerpt">{{ blog.description|truncatewords:25 }}</p>
+            {% else %}
+              <p class="blog-excerpt">{{ blog.content|striptags|truncatewords:25 }}</p>
+            {% endif %}
+
+            {% if blog.updated_at and blog.updated_at != blog.created_at %}
+              <span class="blog-updated">Updated {{ blog.updated_at|date:"M d, Y" }}</span>
+            {% endif %}
+          </div>
+
+          <div class="blog-card-footer">
+            <a href="{% url 'details' slug=blog.slug %}" class="read-link">
+              Read more →
+            </a>
+
+            {% if request.session.user_id == blog.author.id %}
+            <div class="card-actions">
+              <a href="{% url 'update' slug=blog.slug %}" class="action-btn">Edit</a>
+              <a href="{% url 'delete' slug=blog.slug %}" class="action-btn danger">Delete</a>
+            </div>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">✦</div>
+        <h3>No posts yet</h3>
+        <p>Be the first to publish something.</p>
+        <a href="{% url 'post_blog' %}" class="btn-new" style="display:inline-flex; width:auto;">
+          + Write a post
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
